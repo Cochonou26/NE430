@@ -14,4 +14,4 @@ do
   fi
 done
 
-echo "$COMPTEUR"
+echo "$COMPTEUR" errors

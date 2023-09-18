@@ -4,7 +4,7 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <string.h>
-#include "MyAlgo.h1"
+#include "Tests/MyAlgo.h1"
 
 #define MAXLEN 100
 
