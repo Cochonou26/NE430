@@ -1,0 +1,86 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "MyAlgo.h1"
+
+#define MAX_BIT 32
+
+// Helper function to create a new node
+Node *createNode() {
+    Node *newNode = (Node *) malloc(sizeof(Node));
+    newNode->prefix = 0;
+    newNode->netmask = 0;
+    newNode->gw = 0;
+    newNode->children[0] = NULL;
+    newNode->children[1] = NULL;
+    return newNode;
+}
+
+// Initialize the radix tree
+void initMyAlgo() {
+    root = createNode();
+}
+
+// Helper function to insert a prefix into the radix tree
+void insertPrefix(Node *node, unsigned int prefix, unsigned int netmask, unsigned int gw, int depth) {
+    if (depth == MAX_BIT) {
+        node->prefix = prefix;
+        node->netmask = netmask;
+        node->gw = gw;
+        return;
+    }
+
+    unsigned int bit = (prefix >> (MAX_BIT - depth - 1)) & 1;
+
+    if (!node->children[bit]) {
+        node->children[bit] = createNode();
+    }
+
+    insertPrefix(node->children[bit], prefix, netmask, gw, depth + 1);
+}
+
+// Insert a prefix into the radix tree
+void insertMyAlgo(unsigned int prefix, unsigned int netmask, unsigned int gw) {
+    insertPrefix(root, prefix, netmask, gw, 0);
+}
+
+// Helper function to lookup the longest prefix match
+unsigned int lookupPrefix(Node *node, unsigned int addr, int depth) {
+    if (depth == MAX_BIT || !node) {
+        return node ? node->gw : 0;
+    }
+
+    unsigned int bit = (addr >> (MAX_BIT - depth - 1)) & 1;
+
+    if (node->children[bit]) {
+        return lookupPrefix(node->children[bit], addr, depth + 1);
+    } else {
+        return lookupPrefix(node->children[1 - bit], addr, depth + 1);
+    }
+}
+
+// Lookup the longest prefix match for an address
+unsigned int lookupMyAlgo(unsigned int addr) {
+    return lookupPrefix(root, addr, 0);
+}
+
+// Helper function to print the radix tree (used for debugging)
+void printNode(Node *node, int depth) {
+    if (!node) {
+        return;
+    }
+
+    if (node->children[0]) {
+        printNode(node->children[0], depth + 1);
+    }
+
+    for (int i = 0; i < depth; i++) printf(" ");
+    printf("Depth: %d, Prefix: 0x%08X, Netmask: 0x%08X, Gateway: 0x%08X\n", depth, node->prefix, node->netmask, node->gw);
+
+    if (node->children[1]) {
+        printNode(node->children[1], depth + 1);
+    }
+}
+
+void printTree() {
+    printNode(root, 0);
+}
